@@ -29,13 +29,11 @@ import numpy as np
 text = "The quick brown fox jumps over the lazy dog!"
 
 # Write a list comprehension to tokenize the text and remove punctuation
-tokens = _ # Your code here
+tokens = [word.strip(".,!?") for word in text.split()]
 
 # Expected output: ['The', 'quick', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog']
 print(tokens)
 # -----------------------------------------------
-
-
 
 
 # Task 2: Create a function that takes a string and breaks it up into tokens and removes any 
@@ -45,7 +43,12 @@ print(tokens)
 # Your code here:
 # -----------------------------------------------
 def tokenize(string: str) -> list:
-    pass # Your code
+    text = string.split()
+    for i, word in enumerate(text): 
+        text[i] = word.strip(".,!?").lower()
+    unique_words = set(text)
+    return(sorted(unique_words)) #sorted returns a list
+    
 
 
 # -----------------------------------------------
@@ -74,14 +77,22 @@ def tokenize(string: str) -> list:
 
 # Your code here:
 # -----------------------------------------------
-word_frequencies = _ # Your code here
+def tokenize3(string: str) -> list:
+    text = string.split()
+    for i, word in enumerate(text): 
+        text[i] = word.strip(".,!?").lower()
+    return(text)
+
+text3 = tokenize3(text)
+word_frequencies = {word: text3.count(word) for word in text3}
+
 
 # Expected output example: {'the': 2, 'quick': 1, ...}
 print(word_frequencies)
 
 # Modify the comprehension to include only words that appear more than once.
+word_frequencies_2 = {word: text3.count(word) for word in text3 if text3.count(word) > 1}
 # -----------------------------------------------
-
 
 
 # Task 4: Define a function that takes a string and an integer k, and returns a dictionary with
@@ -90,7 +101,8 @@ print(word_frequencies)
 # Your code here:
 # -----------------------------------------------
 def token_counts(string: str, k: int = 1) -> dict:
-    pass # Your code
+    text3 = tokenize3(string)
+    return {word: text3.count(word) for word in text3 if text3.count(word) > k}
 
 # test:
 text_hist = {'the': 2, 'quick': 1, 'brown': 1, 'fox': 1, 'jumps': 1, 'over': 1, 'lazy': 1, 'dog': 1}
@@ -121,7 +133,8 @@ all(text_hist[key] == value for key, value in token_counts(text).items())
 
 # Your code here:
 # -----------------------------------------------
-token_to_id = _ # Your code here
+text2 = tokenize(text)
+token_to_id = {word:id for id, word in enumerate(text2)}
 
 # Expected output: {'dog': 0, 'quick': 1, 'fox': 2, 'the': 3, 'over': 4, 'lazy': 5, 'brown': 6, 'jumps': 7}
 print(token_to_id)
@@ -133,7 +146,7 @@ print(token_to_id)
 #
 # Your code here:
 # -----------------------------------------------
-id_to_token = _ # Your code here
+id_to_token = {id:word for id, word in enumerate(text2)}
 
 # tests: 
 # test 1
@@ -154,8 +167,14 @@ assert all(id_to_token[token_to_id[key]]==key for key in token_to_id) and all(to
 # Your code here:
 # -----------------------------------------------
 def make_vocabulary_map(documents: list) -> tuple:
-    # Hint: use your tokenize function
-    pass # Your code
+    full_text = []
+    for i, string in enumerate(documents):
+        text = tokenize3(string)
+        full_text.extend(text)
+    full_text_unique = set(full_text)
+    token_to_id = {word:id for id, word in enumerate(full_text_unique)}
+    id_to_token = {id:word for id, word in enumerate(full_text_unique)}
+    return (token_to_id, id_to_token)
 
 # Test
 t2i, i2t = make_vocabulary_map([text])
@@ -175,13 +194,19 @@ all(i2t[t2i[tok]] == tok for tok in t2i) # should be True
 # -----------------------------------------------
 def tokenize_and_encode(documents: list) -> list:
     # Hint: use your make_vocabulary_map and tokenize function
-    pass # Your code
+    t2i, i2t = make_vocabulary_map(documents)
+    encoded_sentences = []
+    for document in documents:
+        tokens = tokenize3(document)
+        encoded_sentence = [t2i[token] for token in tokens]
+        encoded_sentences.append(encoded_sentence)
+
+    return encoded_sentences, t2i, i2t
 
 # Test:
 enc, t2i, i2t = tokenize_and_encode([text, 'What a luck we had today!'])
 " | ".join([" ".join(i2t[i] for i in e) for e in enc]) == 'the quick brown fox jumps over the lazy dog | what a luck we had today'
 # -----------------------------------------------
-
 
 
 # In the following set of exercises you're going to implement an RNN from scratch. You'll also
@@ -201,7 +226,8 @@ enc, t2i, i2t = tokenize_and_encode([text, 'What a luck we had today!'])
 
 # Your code here:
 # -----------------------------------------------
-sigmoid = _ # Your code
+sigmoid = lambda x: 1 / (1 + np.exp(-x))
+
 
 # Test:
 np.all(sigmoid(np.log([1, 1/3, 1/7])) == np.array([1/2, 1/4, 1/8]))
@@ -310,7 +336,7 @@ o.shape == (100,) and o.mean().round(3) == 16.287 and o.std().astype(int) == 133
 
 # Your code here:
 # -----------------------------------------------
-def rnn_loss(w: np.array, w, list_of_sequences: list[np.array], y: np.array) -> np.float64:
+def rnn_loss(w: np.array, list_of_sequences: list[np.array], y: np.array) -> np.float64:
     pass # Your code
 
 # Test:
